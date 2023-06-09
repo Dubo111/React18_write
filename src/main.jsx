@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 
+
 let element = (
   <h1>
     hello
@@ -7,7 +8,7 @@ let element = (
     </span>
 
   </h1>)
-
+debugger
 const root = createRoot(document.getElementById('root'))
 console.log(root)
 

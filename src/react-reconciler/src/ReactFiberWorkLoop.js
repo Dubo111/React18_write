@@ -8,6 +8,7 @@ let workInProgress = null
  * @param {*} root 
  */
 export function scheduleUpdateOnFiber (root) {
+  debugger
   // 确保调度执行root上的更新
   ensureRootIsScheduled(root)
 }
@@ -28,6 +29,8 @@ function performConcurrentWorkOnRoot (root) {
 }
 
 function prepareFreshStack (root) {
+
+  // 第一次创建新的缓存池 alternate
   workInProgress = createWorkInProgress(root.current, null)
 }
 function renderRootSync (root) {
@@ -37,6 +40,7 @@ function renderRootSync (root) {
 }
 
 
+//有
 function workLoopSync () {
   while (workInProgress !== null) {
     performUnitOfwORK(workInProgress)
@@ -47,6 +51,7 @@ function performUnitOfwORK (unitOfWork) {
   // 获取新的fiber对应的老fiber
   const current = unitOfWork.alternate
   // 完成当前的fiber的子fiber链表构建后
+  debugger
   const next = beginWork(current, unitOfWork)
   // 把即将生效的属性等于生效的
   unitOfWork.memoizedProps = unitOfWork.pendingProps

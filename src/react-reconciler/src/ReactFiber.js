@@ -44,7 +44,7 @@ export function createHostRootFiber () {
  * @param {*} pendingProps  新属性
  */
 export function createWorkInProgress (current, pendingProps) {
-  let workInProgress = current.alternate
+  let workInProgress = current.alternate //创建缓存池
   if (workInProgress === null) {
     workInProgress = createFiber(current.tag, pendingProps, current.key)
     workInProgress.type = current.type
