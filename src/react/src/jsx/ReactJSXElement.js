@@ -37,7 +37,6 @@ export function jsxDEV (type, config) {
     ref = config.ref
   }
   for (propName in config) {
-    console.log(hasOwnProperty, 'hasOwnProperty')
     if (
       hasOwnProperty.call(config, propName)
       && !RESERVED_PROPS.hasOwnProperty(propName)
