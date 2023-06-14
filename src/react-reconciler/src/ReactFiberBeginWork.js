@@ -2,6 +2,9 @@ import { HostComponent, HostRoot, HostText } from "./ReactWorkTags"
 
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
+
+import { shouldSetTextContent } from 'react-dom-bindings/src/ReactDomHostConfig'
+import logger, { indent } from "shared/logger"
 /**
  * 根据新的虚拟DOM生成新的Fiber链表
  * @param {*} current 老的父Fiber
@@ -9,8 +12,6 @@ import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
  * @param {*} nextChildren 新的子虚拟DOM
  */
 function reconcilechildren (current, workInProgress, nextChildren) {
-  debugger
-
   // 如果此新的fiber没有老的fiber，说明此新fiber是新创建的
   if (current == null) {
     workInProgress.child = mountChildFibers(workInProgress, null, nextChildren)
@@ -20,8 +21,10 @@ function reconcilechildren (current, workInProgress, nextChildren) {
   }
 }
 
+// 创建根fiber tag3
 function updateHostRoot (current, workInProgress) {
   //  需要知道它的子虚拟DOM ， 知道它的儿子虚拟DOM信息
+  //  <因为是根fiber>所以我们需要processUpdateQueue处理他的虚拟DOM
   processUpdateQueue(workInProgress) //workInProgress.memoizedState={ element }
   const nextState = workInProgress.memoizedState // workInProgress.memoizedState={ element }
   //nextChildren 就是新的子虚拟DOM
@@ -31,26 +34,39 @@ function updateHostRoot (current, workInProgress) {
   reconcilechildren(current, workInProgress, nextChildren)
   return workInProgress.child //{tag5,type:h1}
 }
-
 /**
  * 构建原生组件的子fiber链表
- * @param {*} current  老fiber
+ * @param {*} current   老fiber
  * @param {*} workInProgress 新的fiber h1
  */
 function updateHostComponent (current, workInProgress) {
+  const { type } = workInProgress
+  const nextProps = workInProgress.pendingProps
+  let nextChildren = nextProps.children //虚拟DOM 
+  // 判断当前虚拟DOM它的儿子是不是一个文本独生子
+  const isDirectTextChild = shouldSetTextContent(type, nextProps)
+  if (isDirectTextChild) {
+    // console.log('HostText')
+    nextChildren = null
+  }
+  reconcilechildren(current, workInProgress, nextChildren) //构建子fiber
 
+  return workInProgress.child //{tag5,type:h1}
 }
 /**
- * 目标是根据新的虚拟DOM构建新的fiber子链表 child 。sibling
- * @param {*} current 
- * @param {*} workInProgress 
+ * 目标是根据新的虚拟DOM树构建新的fiber子链表 child sibling
+ * @param {*} current   老fiber  unitOfWork.alternate
+ * @param {*} workInProgress 新的fiber h1
  */
 export function beginWork (current, workInProgress) {
-  debugger
+  logger(" ".repeat(indent.number) + 'beginwork', workInProgress)
+  indent.number += 2
   switch (workInProgress.tag) {
     case HostRoot:
+      // HostRoot唯一根fiber标识
       return updateHostRoot(current, workInProgress)
     case HostComponent:
+      // HostComponent 原生组件 (span div h1 ) 根据原生组件构建fiber
       return updateHostComponent(current, workInProgress)
     case HostText:
       return null

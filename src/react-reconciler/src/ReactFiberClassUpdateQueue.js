@@ -73,6 +73,10 @@ export function processUpdateQueue (workInProgress) {
     }
     // 把最终计算到的状态赋值给memoizedState
     workInProgress.memoizedState = newState
+    /**
+     *  
+{$$typeof: Symbol(react.element), type: 'h1', key: null, ref: null, props: {…}}
+     */
   }
 
 }
