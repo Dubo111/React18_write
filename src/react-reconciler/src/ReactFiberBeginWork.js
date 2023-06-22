@@ -1,4 +1,12 @@
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags"
+import {
+  FunctionComponent,
+  HostComponent,
+  HostRoot,
+  HostText,
+  IndeterminateComponent,
+  // FunctionComponent,
+
+} from "./ReactWorkTags"
 
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
@@ -53,6 +61,23 @@ function updateHostComponent (current, workInProgress) {
 
   return workInProgress.child //{tag5,type:h1}
 }
+
+/**
+ * 挂载函数组件
+ * @param {*} current  老fiber
+ * @param {*} workInProgress 新fiber
+ * @param {*} ComponentType  组件类型也就是函数组件
+ */
+export function mountIndeterminateComponent (current, workInProgress, Component) {
+  debugger
+  const props = workInProgress.pendingProps
+  const value = renderWithHooks(current,workInProgress,Component,props)
+
+ 
+  workInProgress.tag = FunctionComponent
+  reconcilechildren(current, workInProgress, value)
+  return workInProgress.child
+}
 /**
  * 目标是根据新的虚拟DOM树构建新的fiber子链表 child sibling
  * @param {*} current   老fiber  unitOfWork.alternate
@@ -62,6 +87,11 @@ export function beginWork (current, workInProgress) {
   logger(" ".repeat(indent.number) + 'beginwork', workInProgress)
   indent.number += 2
   switch (workInProgress.tag) {
+    // 区分是函数组件还是class组件
+    case IndeterminateComponent:
+      return mountIndeterminateComponent(
+        current, workInProgress, workInProgress.type
+      )
     case HostRoot:
       // HostRoot唯一根fiber标识
       return updateHostRoot(current, workInProgress)

@@ -68,7 +68,7 @@ export function completeWork (current, workInProgress) {
       // 如果完成的fiber是文本节点 ,那就创建真实的文本节点
       const newText = newProps
       // 创建真实的DOM节点并传入StateNode
-      workInProgress.stateNode = createTextInstance(newProps)
+      workInProgress.stateNode = createTextInstance(newText)
       // 向上冒泡属性
       bubbleProperties(workInProgress)
   }

@@ -3,6 +3,13 @@ import { createWorkInProgress } from './ReactFiber'
 import { beginWork } from './ReactFiberBeginWork'
 import logger from 'shared/logger'
 import { completeWork } from './ReactFiberCompleteWork'
+import { MutationMask, NoFlags, Placement, Update } from './ReactFiberFlags'
+import { commitMutationEffectsOnFiber } from './ReactFiberCommitWork'
+import {
+  HostComponent,
+  HostRoot,
+  HostText,
+} from './ReactWorkTags'
 let workInProgress = null
 /**
  * 计划更新root
@@ -10,7 +17,6 @@ let workInProgress = null
  * @param {*} root 
  */
 export function scheduleUpdateOnFiber (root) {
-  debugger
   // 确保调度执行root上的更新
   ensureRootIsScheduled(root)
 }
@@ -27,8 +33,26 @@ function ensureRootIsScheduled (root) {
 function performConcurrentWorkOnRoot (root) {
   //第一次渲染已同步的方式渲染根节点，初次渲染的时候，都是同步
   renderRootSync(root)
+  // 开始进入提交阶段 ,就是执行副作用，修改真实DOM
+  const finishedWork = root.current.alternate
+  root.finishedWork = finishedWork
+  commitRoot(root)
 }
 
+function commitRoot (root) {
+  const { finishedWork } = root
+  printFinIshedWork(finishedWork)
+  const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags
+  const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags
+  // 如果自己有副作用或者子节点有副作用那就进行提交DOM操作
+  if (subtreeHasEffects || rootHasEffect) {
+    // commitPlacement(finishedWork)
+    commitMutationEffectsOnFiber(finishedWork, root)
+  }
+  // 等DOM变更后就可以让我们的root的current指向新的fiber树
+  root.current = finishedWork
+
+}
 // root.current  current 就是根fiber
 function prepareFreshStack (root) {
   // 第一次创建新的fiber
@@ -54,7 +78,6 @@ function performUnitOfwORK (unitOfWork) {
   //获取新fiber对应的老fiber
   const current = unitOfWork.alternate
   // 完成当前的fiber的子fiber链表构建后
-  debugger
   const next = beginWork(current, unitOfWork)
   // 把即将生效的属性等于生效的
   unitOfWork.memoizedProps = unitOfWork.pendingProps
@@ -71,7 +94,6 @@ function performUnitOfwORK (unitOfWork) {
 
 // unitOfWork span>"hello"
 function completeUnitOfWork (unitOfWork) {
-  debugger
   let completedWork = unitOfWork
   do {
     const current = completedWork.alternate
@@ -93,4 +115,40 @@ function completeUnitOfWork (unitOfWork) {
 
   } while (completedWork !== null)
 
+}
+
+
+// 打印
+function printFinIshedWork (fiber) {
+  let child = fiber.child
+  while (child) {
+    printFinIshedWork(child)
+    child = child.sibling
+  }
+  if (fiber.flags !== 0) {
+    console.log(getFlags(fiber.flags), getTag(fiber.tag), fiber.type, fiber.memoizedProps)
+  }
+}
+
+function getFlags (flags) {
+  if (flags === Placement) {
+    return '插入'
+  }
+  if (flags === Update) {
+    return '更新'
+  }
+  return flags
+}
+function getTag (tag) {
+  switch (tag) {
+    case HostRoot:
+      return 'HostRoot'
+    case HostComponent:
+      return 'HostComponent'
+    case HostText:
+      return 'HostText'
+    default:
+      return tag
+
+  }
 }

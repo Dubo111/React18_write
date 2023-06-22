@@ -37,6 +37,7 @@ function setInitialDOMProperties (tag, domElement, nextProps) {
   }
 }
 
+// 设置属性
 export function setInitialProperties (domElement, tag, props) {
 
   setInitialDOMProperties(tag, domElement, props)

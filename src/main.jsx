@@ -1,22 +1,23 @@
 import { createRoot } from 'react-dom/client'
 
+// let element = (
+//   <h1 id='h1ss'>
+//     我是h1内容
+//     <span style={{ color: 'red' }} id="spanID">我是span的内容呀  </span>
+//   </h1>
+// )
 
-let element = (
-  // <div>
-
-  //   <h2>
-  //     文本hello--22
-
-  //     <span style={{ color: 'green' }} id="spanID">我的发--2   </span>
-  //   </h2>
-  // </div>
-
-  <h1 id='h1ss'>
-    我是h1内容
-    <span style={{ color: 'red' }} id="spanID">我是span的内容呀  </span>
-  </h1>
-)
+function FunctionComponent () {
+  return (
+    <h1 id='h1ss'>
+      我是h1内容
+      <span style={{ color: 'red' }} >我是span的内容呀  </span>
+    </h1>
+  )
+}
+let element = <FunctionComponent />
+// let element = React.createElement(FunctionComponent)
+// let element = JSX(FunctionComponent)
 
 const root = createRoot(document.getElementById('root'))
-console.log(root)
 root.render(element)
